@@ -56,6 +56,8 @@ export interface File {
     title: string
     description: string
 
+    file_name: string
+
     user: User
     folder: Folder
 

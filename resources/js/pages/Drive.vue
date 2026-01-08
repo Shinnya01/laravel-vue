@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import DriveController from '@/actions/App/Http/Controllers/DriveController';
 import Heading from '@/components/Heading.vue';
+import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -35,7 +36,7 @@ import {
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/app/AppHeaderLayout.vue';
 import { File, Folder } from '@/types';
-import { Form, Head, useForm } from '@inertiajs/vue3';
+import { Form, Head, Link, useForm } from '@inertiajs/vue3';
 import { Folder as FolderIcon } from 'lucide-vue-next';
 import { ref } from 'vue';
 
@@ -57,8 +58,8 @@ const form = useForm({
     folder_id: '',
 });
 
-function handleAddFile(e: any){
-    form.file_name = e.target?.files[0]
+function handleAddFile(e: any) {
+    form.file_name = e.target?.files[0];
 }
 
 const createFolder = () => {
@@ -111,23 +112,26 @@ const createFile = () => {
 
                     <div class="grid grid-cols-4 gap-4">
                         <div v-for="folder in props.folders">
-                            <Card class="p-2">
-                                <CardHeader class="p-2">
-                                    <div class="flex items-center gap-4">
-                                        <FolderIcon />
-                                        <div>
-                                            <CardTitle>{{
-                                                folder.name
-                                            }}</CardTitle>
-                                            <CardDescription>{{
-                                                new Date(
-                                                    folder.created_at,
-                                                ).toLocaleString()
-                                            }}</CardDescription>
+                            <Link :href="`/drive/${folder.id}`">
+                                <Card class="p-2">
+                                    <CardHeader class="p-2">
+                                        <div class="flex items-center gap-4">
+                                            <FolderIcon />
+                                            <div>
+                                                <CardTitle>{{
+                                                    folder.name
+                                                }}</CardTitle>
+                                                <CardDescription>{{
+                                                    new Date(
+                                                        folder.created_at,
+                                                    ).toLocaleString()
+                                                }}
+                                                </CardDescription>
+                                            </div>
                                         </div>
-                                    </div>
-                                </CardHeader>
-                            </Card>
+                                    </CardHeader>
+                                </Card>
+                            </Link>
                         </div>
                         <p v-if="folders.length === 0">No folders added</p>
                     </div>
@@ -135,10 +139,22 @@ const createFile = () => {
                 <section>
                     <Heading title="Files" />
                     <div class="grid grid-cols-4 gap-4">
-                        <div v-for="file in props.files">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>{{ file.title }}</CardTitle>
+                        <div v-for="file in props.files" >
+                            <Card class="min-h-24 p-2">
+                                <CardHeader class="p-2">
+                                    <CardTitle class="truncate">{{
+                                        file.title
+                                    }}</CardTitle>
+
+                                    <CardDescription class="truncate">
+                                        <a
+                                            :href="`/storage/${file.file_name}`"
+                                            target="_blank"
+                                            >{{ file.file_name }}</a
+                                        >
+                                        <p>{{ file.folder?.name }}</p>
+                                        </CardDescription
+                                    >
                                 </CardHeader>
                             </Card>
                         </div>
@@ -169,13 +185,6 @@ const createFile = () => {
                                 for
                                 placeholder="Folder name"
                                 required
-                            />
-                            <Label for="folder-description">Folder name</Label>
-                            <Input
-                                type="text"
-                                id="folder-description"
-                                v-model="form.description"
-                                placeholder="Folder description"
                             />
                         </div>
                         <DialogFooter>
@@ -232,8 +241,8 @@ const createFile = () => {
                                 id="file-title"
                                 v-model="form.title"
                                 placeholder="file name"
-                                required
                             />
+                            <InputError :message="form.errors.title" />
                             <Label for="file-description"
                                 >file description</Label
                             >
@@ -243,13 +252,14 @@ const createFile = () => {
                                 v-model="form.description"
                                 placeholder="file description"
                             />
-
+                            <InputError :message="form.errors.description" />
                             <Label for="file-name">file description</Label>
                             <Input
                                 type="file"
                                 @change="handleAddFile"
                                 id="file-name"
                             />
+                            <InputError :message="form.errors.file_name" />
                         </div>
                         <DialogFooter>
                             <DialogClose as-child>

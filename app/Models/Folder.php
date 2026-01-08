@@ -13,4 +13,9 @@ class Folder extends Model
     public function owner(){
         return $this->BelongsTo(User::class);
     }
+
+
+    public function files(){
+        return $this->hasMany(Item::class);
+    }
 }

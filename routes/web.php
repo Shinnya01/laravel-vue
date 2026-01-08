@@ -37,7 +37,9 @@ Route::middleware(['auth', 'verified'])->group(function (){
 
     Route::prefix('drive')->group(function() {
         Route::get('/', [DriveController::class, 'index'])->name('drive.index');
+        Route::get('/{folder}', [DriveController::class, 'show'])->name('drive.show');
         Route::post('/', [DriveController::class, 'store'])->name('drive.store');
+        
     });
 });
 

@@ -20,7 +20,7 @@ class DriveController extends Controller
     {
         return Inertia::render('Drive', [
             'folders' => Folder::where('user_id', Auth::id())->get(),
-            'files' => Item::where('user_id', Auth::id())->get(),
+            'files' => Item::with(['folder'])->where('user_id', Auth::id())->get(),
         ]);
     }
 
@@ -54,12 +54,14 @@ class DriveController extends Controller
                 'title' => 'required|min:4',
                 'description' => 'nullable|max:255',
                 'folder_id' => 'nullable|exists:folders,id',
-                'file_name' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
+                'file_name' => 'required|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
+            ], [
+                'file_name.required' => 'The file field is required.'
             ]);
 
-            if($request->hasFile('file_name')){
-                $file['file_name'] = $request->file('file_name')->store('drive', 'public');
-            }
+            
+            $file['file_name'] = $request->file('file_name')->store('drive', 'public');
+            
 
             Item::create([
                 ...$file,
@@ -73,9 +75,11 @@ class DriveController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Drive $drive)
+    public function show(Folder $folder)
     {
-        //
+        $folder = Folder::with('files')->get();
+
+        dd($folder);
     }
 
     /**
